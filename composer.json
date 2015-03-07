@@ -1,0 +1,21 @@
+{
+	"name": "j3j5/twitterapio",
+	"description": "A wrapper for the great tmhoauth to use with Twitter's API.",
+	"require": {
+		"php": ">=5.3.0",
+		"themattharris/tmhoauth": "*"
+	},
+	"license": "LGPLv3",
+	"authors": [
+	{
+		"name": "Julio Foulquié",
+		"email": "jfoulquie@gmail.com"
+	}
+	],
+	"minimum-stability": "dev",
+	"autoload": {
+		"psr-0": {
+			"j3j5": "src/"
+		}
+	}
+}
