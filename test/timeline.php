@@ -1,21 +1,35 @@
 <?php
 
 
-require_once __DIR__ . '/../vendor/autoload.php'; // Autoload files using Composer autoload
+require dirname(__DIR__) . '/vendor/autoload.php'; // Autoload files using Composer autoload
 
 
 use j3j5\TwitterApio;
 
 $api = new TwitterApio();
 
-$result = $api->get('account/verify_credentials');
+$all_tweets = array();
+$i = 1;
+$max_pages = 5;
+$username = 'twitterapi';
+foreach($api->get_timeline('statuses/user_timeline', array('screen_name' => $username, 'count' => 20)) as $tweets) {
+	echo "Retrieving page $i ";
+	if(!empty($tweets) && is_array($tweets)) {
+		echo "with " . count($tweets) . " tweets." . PHP_EOL;
+		$all_tweets = array_merge($all_tweets, $tweets);
+	} else {
+		echo "(empty)." . PHP_EOL;
+	}
 
-if(isset($result['id'])) {
-	echo "Your user @{$result['screen_name']} has ID '{$result['id']}' and name '{$result['name']}'.". PHP_EOL;
-} else {
-	$config_path = dirname(__DIR__) . "/src/j3j5/config.php";
-	echo "An error occured, did you fill the config.php file?". PHP_EOL;
-	echo "It should be on $config_path" . PHP_EOL;
+	if($i == $max_pages) {
+		break;
+	}
+	$i++;
 }
+echo PHP_EOL . PHP_EOL;
+echo count($all_tweets) .  " retrieved in total from the API."  . PHP_EOL ;
 
+foreach($all_tweets as $tweet) {
+	echo "{$tweet['created_at']}: {$tweet['text']}".PHP_EOL;
+}
 return;
