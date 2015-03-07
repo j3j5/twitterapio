@@ -22,6 +22,11 @@ class TwitterApio extends tmhOAuth {
 	protected $api_settings;
 	protected $general_config;
 
+	protected $max_counts = array(
+		'statuses/user_timeline'	=> 200,
+		'followers/ids'				=> 5000,
+	);
+
 	/**
 	 * Create an instance of the TwitterApio class
 	 *
