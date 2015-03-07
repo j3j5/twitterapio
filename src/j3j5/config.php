@@ -1,9 +1,10 @@
 <?php
 
 $general_config = array(
-	'api_version'	=> '1.1',
-	'result_format'	=> '.json',
-	'json_decode'	=> 'array',
+	'api_version'			=> '1.1',
+	'result_format'			=> '.json',
+	'json_decode'			=> 'array',	// Valid values are 'array' and 'object'
+	'sleep_on_rate_limit'	=> TRUE,
 );
 
 $twitter_settings = array(
