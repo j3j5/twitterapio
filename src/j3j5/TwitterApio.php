@@ -17,6 +17,8 @@ use tmhOAuth;
 
 class TwitterApio extends tmhOAuth {
 
+	private static $debug = FALSE;
+
 	protected $api_settings;
 	protected $general_config;
 
@@ -31,6 +33,13 @@ class TwitterApio extends tmhOAuth {
 	public function __construct($settings = array(), $config = array()) {
 		include __DIR__ . '/config.php';
 		$this->general_config = array_merge($general_config, $config);
+		if(isset($this->general_config['debug'])) {
+			self::$debug = $this->general_config['debug'];
+			// Don't allow ouput if not running from the CLI
+			if(PHP_SAPI != 'cli') {
+				self::$debug = FALSE;
+			}
+		}
 		parent::__construct(array_merge($twitter_settings, $settings));
 	}
 
@@ -192,6 +201,14 @@ class TwitterApio extends tmhOAuth {
 			'errors'	=> $this->response['response'],
 			'tts'		=> 0,
 		);
+	}
+
+	public static function debug($msg) {
+		if(self::$debug) {
+			echo date('Y-m-d H:i:s --> ') . $msg . PHP_EOL;
+		} else {
+			///TODO: Add some logger
+		}
 	}
 
 }

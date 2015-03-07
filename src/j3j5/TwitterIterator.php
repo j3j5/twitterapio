@@ -27,6 +27,10 @@ abstract class TwitterIterator implements \Iterator
 
 		include __DIR__ . '/config.php';
 		$this->sleep_on_rate_limit = $general_config['sleep_on_rate_limit'];
+		// Overwrite the setting if running on webserver
+		if(PHP_SAPI != 'cli') {
+			$this->sleep_on_rate_limit = FALSE;
+		}
 		$this->response_array = isset($general_config['json_decode']) && $general_config['json_decode'] == 'array' ? TRUE : FALSE ;
 	}
 }

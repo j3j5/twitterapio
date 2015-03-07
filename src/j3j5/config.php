@@ -5,6 +5,7 @@ $general_config = array(
 	'result_format'			=> '.json',
 	'json_decode'			=> 'array',	// Valid values are 'array' and 'object'
 	'sleep_on_rate_limit'	=> TRUE,
+	'debug'					=> TRUE,
 );
 
 $twitter_settings = array(

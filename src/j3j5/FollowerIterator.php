@@ -30,11 +30,11 @@ class FollowerIterator extends TwitterIterator {
 		// Check for rate limits
 		if(is_array($resp) && isset($resp['errors'], $resp['tts']) && $this->sleep_on_rate_limit) {
 			if($resp['tts'] == 0) {
-				echo "An error occured: " . print_r($resp['errors'], TRUE) . PHP_EOL;
+				TwitterApio::debug("An error occured: " . print_r($resp['errors'], TRUE));
 				$this->next_cursor = $this->prev_cursor = 0;
 				return array();
 			} else {
-				echo "Sleeping for {$resp['tts']}s. ...".PHP_EOL;
+				TwitterApio::debug("Sleeping for {$resp['tts']}s. ...");
 				sleep($resp['tts'] + 1);
 				// Retry
 				$resp = $this->api->get($this->endpoint, $arguments);
