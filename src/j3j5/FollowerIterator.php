@@ -15,10 +15,7 @@ class FollowerIterator extends TwitterIterator {
 	private $next_cursor = 0;
 
 	public function __construct($api, $endpoint, $arguments) {
-		require 'config.php';
-		$this->sleep_on_rate_limit = $general_config['sleep_on_rate_limit'];
 		parent::__construct($api, $endpoint, $arguments);
-
 	}
 
 	public function rewind() {

@@ -25,7 +25,7 @@ abstract class TwitterIterator implements \Iterator
 		$this->endpoint = $endpoint;
 		$this->arguments = $arguments;
 
-		require 'config.php';
+		include __DIR__ . '/config.php';
 		$this->sleep_on_rate_limit = $general_config['sleep_on_rate_limit'];
 		$this->response_array = isset($general_config['json_decode']) && $general_config['json_decode'] == 'array' ? TRUE : FALSE ;
 	}

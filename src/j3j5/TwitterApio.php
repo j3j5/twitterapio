@@ -29,7 +29,7 @@ class TwitterApio extends tmhOAuth {
 	 * @return void
 	 */
 	public function __construct($settings = array(), $config = array()) {
-		require 'config.php';
+		include __DIR__ . '/config.php';
 		$this->general_config = array_merge($general_config, $config);
 		parent::__construct(array_merge($twitter_settings, $settings));
 	}
