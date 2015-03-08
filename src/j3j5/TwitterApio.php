@@ -37,7 +37,8 @@ class TwitterApio extends tmhOAuth {
 	 */
 	public function __construct($settings = array(), $config = array()) {
 		include __DIR__ . '/config.php';
-		$this->general_config = array_merge($general_config, $config);
+		$this->general_config = array_merge($general_config, $twitter_settings);
+		$this->general_config = array_merge($this->general_config, $config);
 		if(isset($this->general_config['debug'])) {
 			self::$debug = $this->general_config['debug'];
 			// Don't allow ouput if not running from the CLI
@@ -46,6 +47,21 @@ class TwitterApio extends tmhOAuth {
 			}
 		}
 		parent::__construct(array_merge($twitter_settings, $settings));
+	}
+
+	/**
+	 * Set new config values for the OAuth class like different tokens.
+	 *
+	 * @param Array $config An array containing the values that should be overwritten.
+	 *
+	 * @return void
+	 *
+	 * @author Julio Foulquié <jfoulquie@gmail.com>
+	 */
+	public function reconfigure($config) {
+		// The consumer key and secret must always be included when reconfiguring
+		$config = array_merge($this->general_config, $config);
+		parent::reconfigure($config);
 	}
 
 	/**
@@ -59,7 +75,7 @@ class TwitterApio extends tmhOAuth {
 	 * @author Julio Foulquié <jfoulquie@gmail.com>
 	 */
 	public function get($slug, $parameters = array()) {
-		$code = $this->request('GET', $this->url("{$this->general_config['api_version']}/$slug{$this->general_config['result_format']}"), $parameters);
+		$code = $this->request('GET', $this->url("{$this->general_config['api_version']}/$slug"), $parameters);
 		return $this->response($code);
 	}
 
@@ -74,8 +90,83 @@ class TwitterApio extends tmhOAuth {
 	 * @author Julio Foulquié <jfoulquie@gmail.com>
 	 */
 	public function post($slug, $parameters = array()) {
-		$code = $this->request('POST', $this->url("{$this->general_config['api_version']}/$slug{$this->general_config['result_format']}"), $parameters);
+		$code = $this->request('POST', $this->url("{$this->general_config['api_version']}/$slug"), $parameters);
 		return $this->response($code);
+	}
+
+
+	/**
+	 * Get a request_token from Twitter
+	 *
+	 * @param String $oauth_callback [Optional] The callback provided for Twitter's API.
+	 * The user will be redirected there after authorizing your app oAn Twitter.
+	 *
+	 * @return Array|Bool a key/value array containing oauth_token and oauth_token_secret
+	 * 						in case of success
+	 *
+	 * @author Julio Foulquié <jfoulquie@gmail.com>
+	 */
+	function get_request_token($oauth_callback = NULL) {
+		$parameters = array();
+		if (!empty($oauth_callback)) {
+			$parameters['oauth_callback'] = $oauth_callback;
+		}
+		$code = $this->request('POST', $this->url("oauth/request_token", ''), $parameters);
+		if(isset($this->response['code']) && $this->response['code'] == 200 && !empty($this->response['response'])) {
+			$get_parameters = $this->response['response'];
+			$token = array();
+			parse_str($get_parameters, $token);
+		}
+		// Return the token if it was properly retrieved
+		if( isset($token['oauth_token'], $token['oauth_token_secret']) ){
+			return $token;
+		} else {
+			return FALSE;
+		}
+	}
+	/**
+	 * Get an access token for a logged in user
+	 *
+	 * @param String|Bool $oauth_verifier
+	 *
+	 * @return Array|Bool key/value array containing the token in case of success
+	 *
+	 * @author Julio Foulquié <jfoulquie@gmail.com>
+	 */
+	public function get_access_token($oauth_verifier = FALSE) {
+		$parameters = array();
+		if (!empty($oauth_verifier)) {
+			$parameters['oauth_verifier'] = $oauth_verifier;
+		}
+		$code = $this->request('POST', $this->url("oauth/access_token", ''), $parameters);
+		if(isset($this->response['code']) && $this->response['code'] == 200 && !empty($this->response['response'])) {
+			$get_parameters = $this->response['response'];
+			$token = array();
+			parse_str($get_parameters, $token);
+			// Reconfigure the tmhOAuth class with the new tokens
+			$this->reconfigure(array('token' => $token['oauth_token'], 'secret' => $token['oauth_token_secret']));
+			return $token;
+		}
+		return FALSE;
+	}
+	/**
+	 * Get the authorize URL
+	 *
+	 * @returns string
+	 *
+	 * @author Julio Foulquié <jfoulquie@gmail.com>
+	 */
+	public function get_authorize_url($token, $sign_in_with_twitter = TRUE, $force_login = FALSE) {
+		if (is_array($token)) {
+			$token = $token['oauth_token'];
+		}
+		if ($force_login) {
+			return "https://api.twitter.com/oauth/authenticate?oauth_token={$token}&force_login=true";
+		} else if (empty($sign_in_with_twitter)) {
+			return Config::get('thujohn/twitter::AUTHORIZE_URL') . "?oauth_token={$token}";
+		} else {
+			return "https://api.twitter.com/oauth/authenticate?oauth_token={$token}";
+		}
 	}
 
 	/**
@@ -111,9 +202,9 @@ class TwitterApio extends tmhOAuth {
 	/**
 	 * Parse the response depending on the provided code
 	 *
-	 * @param p1
+	 * @param Int $code Response code.
 	 *
-	 * @return return
+	 * @return Mixed
 	 *
 	 * @author Julio Foulquié <jfoulquie@gmail.com>
 	 */
