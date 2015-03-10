@@ -169,6 +169,34 @@ class TwitterApio extends tmhOAuth {
 		}
 	}
 
+	public function block($twitter_id, $parameters = array()) {
+		if(!is_numeric($twitter_id)) {
+			return FALSE;
+		}
+		$slug = 'blocks/create';
+		$default_parameters = array(
+			'user_id' => $twitter_id,
+			'include_entities'	=> FALSE,
+			'skip_status'	=> FALSE,
+		);
+		$parameters = array_merge($default_parameters, $parameters);
+		return $this->post($slug, $parameters);
+	}
+
+	public function unblock($twitter_id, $parameters = array()) {
+		if(!is_numeric($twitter_id)) {
+			return FALSE;
+		}
+		$slug = 'blocks/destroy';
+		$default_parameters = array(
+			'user_id' => $twitter_id,
+			'include_entities'	=> FALSE,
+			'skip_status'	=> FALSE,
+		);
+		$parameters = array_merge($default_parameters, $parameters);
+		return $this->post($slug, $parameters);
+	}
+
 	/**
 	 * Get all possible tweets from a timeline endpoint.
 	 * This function returns an iterator so must be used with a function that implements the Iterator
@@ -196,6 +224,20 @@ class TwitterApio extends tmhOAuth {
 	 */
 	public function get_followers($arguments) {
 		$slug = 'followers/ids';
+		return new FollowerIterator($this, $slug, $arguments);
+	}
+
+	/**
+	 * Get all possible followers IDs for a given user
+	 *
+	 * @param Array $arguments Arguments for the request ('user_id' or 'screen_name' at least, but also 'count' or others are possible)
+	 *
+	 * @return FollowerIterator
+	 *
+	 * @author Julio Foulquié <jfoulquie@gmail.com>
+	 */
+	public function get_friends($arguments) {
+		$slug = 'friends/ids';
 		return new FollowerIterator($this, $slug, $arguments);
 	}
 
