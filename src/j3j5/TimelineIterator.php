@@ -65,7 +65,7 @@ class TimelineIterator extends TwitterIterator {
 			} elseif(isset($resp['statuses'])) {
 				// Search results come this way
 				$first_tweet = end($resp['statuses']);
-				$larst_tweet = reset($resp['statuses']);
+				$latest_tweet = reset($resp['statuses']);
 				$resp = $resp['statuses'];
 			} else {
 				$this->since_id = $this->max_id = 0;
@@ -78,7 +78,7 @@ class TimelineIterator extends TwitterIterator {
 			} elseif(isset($resp->statuses)) {
 				// Search results come this way
 				$first_tweet = end($resp->statuses);
-				$larst_tweet = reset($resp->statuses);
+				$latest_tweet = reset($resp->statuses);
 				$resp = $resp->statuses;
 			} else {
 				$this->since_id = $this->max_id = 0;
