@@ -25,7 +25,7 @@ abstract class TwitterIterator implements \Iterator
 		$this->endpoint = $endpoint;
 		$this->arguments = $arguments;
 
-		include __DIR__ . '/config.php';
+		$general_config = $this->api->get_config();
 		$this->sleep_on_rate_limit = $general_config['sleep_on_rate_limit'];
 		// Overwrite the setting if running on webserver
 		if(PHP_SAPI != 'cli') {

@@ -64,6 +64,10 @@ class TwitterApio extends tmhOAuth {
 		parent::reconfigure($config);
 	}
 
+	public function get_config() {
+		return $this->general_config;
+	}
+
 	/**
 	 * Do a GET request to the Twitter API
 	 *
