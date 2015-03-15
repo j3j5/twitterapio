@@ -43,8 +43,9 @@ class TimelineIterator extends TwitterIterator {
 			unset($arguments['max_id']);
 		}
 		$resp = $this->api->get($this->endpoint, $arguments);
+
 		// Check for rate limits
-		if(isset($resp['errors'], $resp['tts']) && $this->sleep_on_rate_limit) {
+		if(is_array($resp) && isset($resp['errors'], $resp['tts']) && $this->sleep_on_rate_limit) {
 			if($resp['tts'] == 0) {
 				TwitterApio::debug("An error occured: " . print_r($resp['errors'], TRUE));
 				$this->max_id = $this->since_id = 0;
@@ -57,11 +58,32 @@ class TimelineIterator extends TwitterIterator {
 			}
 		}
 
-		if(is_array($resp) && !isset($resp['errors'])) {
-			$first_tweet = end($resp);
-			$latest_tweet = reset($resp);
+		if($this->response_array) {
+			if(is_array($resp) && !isset($resp['errors']) && !isset($resp['statuses'])) {
+				$first_tweet = end($resp);
+				$latest_tweet = reset($resp);
+			} elseif(isset($resp['statuses'])) {
+				// Search results come this way
+				$first_tweet = end($resp['statuses']);
+				$larst_tweet = reset($resp['statuses']);
+				$resp = $resp['statuses'];
+			} else {
+				$this->since_id = $this->max_id = 0;
+				$latest_tweet = $first_tweet = FALSE;
+			}
 		} else {
-			$this->since_id = $this->max_id = 0;
+			if(is_object($resp) && !isset($resp->statuses)) {
+				$first_tweet = end($resp);
+				$latest_tweet = reset($resp);
+			} elseif(isset($resp->statuses)) {
+				// Search results come this way
+				$first_tweet = end($resp->statuses);
+				$larst_tweet = reset($resp->statuses);
+				$resp = $resp->statuses;
+			} else {
+				$this->since_id = $this->max_id = 0;
+				$latest_tweet = $first_tweet = FALSE;
+			}
 		}
 
 		// Update since_id with the most recent tweet received
@@ -109,5 +131,5 @@ class TimelineIterator extends TwitterIterator {
 	public function valid() {
 		return ($this->max_id !== 0);
 	}
-	
+
 }

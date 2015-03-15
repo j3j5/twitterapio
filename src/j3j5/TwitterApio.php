@@ -106,7 +106,7 @@ class TwitterApio extends tmhOAuth {
 	 *
 	 * @author Julio Foulquié <jfoulquie@gmail.com>
 	 */
-	function get_request_token($oauth_callback = NULL) {
+	public function get_request_token($oauth_callback = NULL) {
 		$parameters = array();
 		if (!empty($oauth_callback)) {
 			$parameters['oauth_callback'] = $oauth_callback;
