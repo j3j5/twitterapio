@@ -25,6 +25,8 @@ class TwitterApio extends tmhOAuth {
 	protected $max_counts = array(
 		'statuses/user_timeline'	=> 200,
 		'followers/ids'				=> 5000,
+		'search/tweets'				=> 100,
+		'users/lookup'				=> 100,
 	);
 
 	/**
@@ -96,6 +98,44 @@ class TwitterApio extends tmhOAuth {
 	public function post($slug, $parameters = array()) {
 		$code = $this->request('POST', $this->url("{$this->general_config['api_version']}/$slug"), $parameters);
 		return $this->response($code);
+	}
+
+	/**
+	 * Owerwrite the parent's request function to clean up some parameters before sending.
+	 *
+	 * @param string $method the HTTP method being used. e.g. POST, GET, HEAD etc
+	 * @param string $url the request URL without query string parameters
+	 * @param array $params the request parameters as an array of key=value pairs. Default empty array
+	 * @param string $useauth whether to use authentication when making the request. Default true
+	 * @param string $multipart whether this request contains multipart data. Default false
+	 * @param array $headers any custom headers to send with the request. Default empty array
+	 *
+	 * @return int the http response code for the request. 0 is returned if a connection could not be made
+	 *
+	 * @author Julio Foulquié <jfoulquie@gmail.com>
+	 */
+	public function request($method, $url, $params=array(), $useauth=true, $multipart=false, $headers=array()) {
+		// Check parameters and clean
+		foreach($params AS $param => $val) {
+			switch($param) {
+				case 'user_id':
+					if(!is_numeric($val)) {
+						///TODO: Add logging
+						return FALSE;
+					}
+					break;
+				case 'count':
+					// Don't allow count bigger than the max allowed by twitter'
+					if(isset($this->max_counts[$url]) && $val > $this->max_counts) {
+						$params[$param] = $this->max_counts[$url];
+					}
+					break;
+				default:
+					break;
+			}
+		}
+
+		return parent::request($method, $url, $params, $useauth, $multipart, $headers);
 	}
 
 
