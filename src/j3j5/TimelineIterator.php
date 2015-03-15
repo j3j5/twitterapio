@@ -45,16 +45,21 @@ class TimelineIterator extends TwitterIterator {
 		$resp = $this->api->get($this->endpoint, $arguments);
 
 		// Check for rate limits
-		if(is_array($resp) && isset($resp['errors'], $resp['tts']) && $this->sleep_on_rate_limit) {
-			if($resp['tts'] == 0) {
-				TwitterApio::debug("An error occured: " . print_r($resp['errors'], TRUE));
+		if(is_array($resp) && isset($resp['errors'], $resp['tts']) ) {
+			if($this->sleep_on_rate_limit) {
+				if($resp['tts'] == 0) {
+					TwitterApio::debug("An error occured: " . print_r($resp['errors'], TRUE));
+					$this->max_id = $this->since_id = 0;
+					return array();
+				} else {
+					TwitterApio::debug("Sleeping for {$resp['tts']}s. ...");
+					sleep($resp['tts'] + 1);
+					// Retry
+					$resp = $this->api->get($this->endpoint, $arguments);
+				}
+			} else {
 				$this->max_id = $this->since_id = 0;
 				return array();
-			} else {
-				TwitterApio::debug("Sleeping for {$resp['tts']}s. ...");
-				sleep($resp['tts'] + 1);
-				// Retry
-				$resp = $this->api->get($this->endpoint, $arguments);
 			}
 		}
 
