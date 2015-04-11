@@ -49,3 +49,29 @@ $api = new TwitterApio($twitter_settings);
 $credentials = $api->get('account/verify_credentials');
 $tweet = $api->post('statuses/update', array('status' => 'Testing TwitterApio!!!'));
 ```
+
+Or the more interesting ones...the ones with iterators!!
+```php
+$username = "masaenfurecida";
+$tweets = array();
+// get_timeline() can be used with any endpoint that returns a timeline (like statuses/mentions_timeline, statuses/home_timeline)
+foreach($api->get_timeline('statuses/user_timeline', array('screen_name' => $username, 'count' => 200)) as $page) {
+	if(is_array($page) ) {
+		$tweets = array_merge($tweets, $page);
+	}
+}
+
+$followers = array();
+foreach($api->get_followers(array('screen_name' => $username, 'count' => 5000)) as $page) {
+	if(is_array($page) ) {
+		$followers = array_merge($followers, $page);
+	}
+}
+
+$friends = array();
+foreach($api->get_friends(array('screen_name' => $username, 'count' => 5000)) as $page) {
+	if(is_array($page) ) {
+		$friends = array_merge($friends, $page);
+	}
+}
+```
