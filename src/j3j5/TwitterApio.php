@@ -14,13 +14,14 @@
 namespace j3j5;
 
 use tmhOAuth;
+use \Monolog\Logger;
+use \Monolog\Handler\StreamHandler;
 
 class TwitterApio extends tmhOAuth {
 
-	private static $debug = FALSE;
-
 	protected $api_settings;
 	protected $general_config;
+	private $log;
 
 	protected $max_counts = array(
 		'statuses/user_timeline'	=> 200,
@@ -41,13 +42,14 @@ class TwitterApio extends tmhOAuth {
 		include __DIR__ . '/config.php';
 		$this->general_config = array_merge($general_config, $twitter_settings);
 		$this->general_config = array_merge($this->general_config, $config);
-		if(isset($this->general_config['debug'])) {
-			self::$debug = $this->general_config['debug'];
-			// Don't allow ouput if not running from the CLI
-			if(PHP_SAPI != 'cli') {
-				self::$debug = FALSE;
-			}
+
+		$this->log = new Logger('reply-bot');
+		if(PHP_SAPI == 'cli') {
+			$this->log->pushHandler(new StreamHandler("php://stdout", Logger::DEBUG));
+		} else {
+			$this->log->pushHandler(new StreamHandler(dirname(__DIR__) . '/data/logs/twitterapio.log', Logger::DEBUG));
 		}
+
 		parent::__construct(array_merge($twitter_settings, $settings));
 	}
 
@@ -81,6 +83,7 @@ class TwitterApio extends tmhOAuth {
 	 * @author Julio Foulquié <jfoulquie@gmail.com>
 	 */
 	public function get($slug, $parameters = array()) {
+		$this->log->addInfo("GET to $slug with paramters " . print_r($parameters, TRUE));
 		$code = $this->request('GET', $this->url("{$this->general_config['api_version']}/$slug"), $parameters);
 		return $this->response($code);
 	}
@@ -96,6 +99,7 @@ class TwitterApio extends tmhOAuth {
 	 * @author Julio Foulquié <jfoulquie@gmail.com>
 	 */
 	public function post($slug, $parameters = array()) {
+		$this->log->addInfo("POST to $slug with paramters " . print_r($parameters, TRUE));
 		$code = $this->request('POST', $this->url("{$this->general_config['api_version']}/$slug"), $parameters);
 		return $this->response($code);
 	}
@@ -121,6 +125,7 @@ class TwitterApio extends tmhOAuth {
 				case 'user_id':
 					if(!is_numeric($val)) {
 						///TODO: Add logging
+						$this->log->addWarning("user_id must be numeric $val");
 						return FALSE;
 					}
 					break;
@@ -135,6 +140,7 @@ class TwitterApio extends tmhOAuth {
 			}
 		}
 
+		$this->log->addInfo("$method request to $url with params " . print_r($params, TRUE));
 		return parent::request($method, $url, $params, $useauth, $multipart, $headers);
 	}
 
@@ -325,7 +331,7 @@ class TwitterApio extends tmhOAuth {
 	private function success() {
 
 		if(!isset($this->response['response']) OR !is_string($this->response['response'])) {
-			///TODO: Log Error
+			$this->log->addError("There is no response! PANIC!!");
 			return FALSE;
 		}
 		$json_output = $this->general_config['json_decode'] == 'array' ? TRUE : FALSE ;
@@ -342,7 +348,8 @@ class TwitterApio extends tmhOAuth {
 	 * @author Julio Foulquié <jfoulquie@gmail.com>
 	 */
 	private function request_does_not_exist() {
-		///TODO :Log error
+		$this->log->addError("REQUEST DOES NOT EXIST!");
+		$this->log->addError(print_r($this->response, TRUE));
 		return array(
 			'code'		=> $this->response['code'],
 			'errors'	=> $this->response['response'],
@@ -359,8 +366,8 @@ class TwitterApio extends tmhOAuth {
 	 * @author Julio Foulquié <jfoulquie@gmail.com>
 	 */
 	private function rate_limit() {
-		///TODO :Log error
-		return array(
+		$this->log->addError("RATE LIMIT!");
+		$this->log->addError(print_r($this->response, TRUE));return array(
 			'code'		=> $this->response['code'],
 			'errors'	=> $this->response['response'],
 			'tts'		=> isset($this->response['headers']['x-rate-limit-reset']) ? // Time To Sleep
@@ -377,20 +384,13 @@ class TwitterApio extends tmhOAuth {
 	 * @author Julio Foulquié <jfoulquie@gmail.com>
 	 */
 	private function general_error() {
-		///TODO :Log error
+		$this->log->addError("API ERROR!");
+		$this->log->addError(print_r($this->response, TRUE));
 		return array(
 			'code'		=> $this->response['code'],
 			'errors'	=> $this->response['response'],
 			'tts'		=> 0,
 		);
-	}
-
-	public static function debug($msg) {
-		if(self::$debug) {
-			echo date('Y-m-d H:i:s --> ') . $msg . PHP_EOL;
-		} else {
-			///TODO: Add some logger
-		}
 	}
 
 }
