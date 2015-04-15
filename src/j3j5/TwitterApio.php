@@ -62,7 +62,7 @@ class TwitterApio extends tmhOAuth {
 	 *
 	 * @author Julio Foulquié <jfoulquie@gmail.com>
 	 */
-	public function reconfigure($config) {
+	public function reconfigure($config = array()) {
 		// The consumer key and secret must always be included when reconfiguring
 		$config = array_merge($this->general_config, $config);
 		parent::reconfigure($config);
