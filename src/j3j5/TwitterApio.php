@@ -46,7 +46,7 @@ class TwitterApio extends tmhOAuth {
 		$this->general_config = array_merge($general_config, $twitter_settings);
 		$this->general_config = array_merge($this->general_config, $config);
 
-		$this->log = new Logger('reply-bot');
+		$this->log = new Logger('twitter-apio');
 		if(PHP_SAPI == 'cli') {
 			$this->log->pushHandler(new StreamHandler("php://stdout", Logger::DEBUG));
 		} else {
