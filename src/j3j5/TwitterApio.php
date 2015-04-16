@@ -341,7 +341,8 @@ class TwitterApio extends tmhOAuth {
 			case 304:
 				return $this->success();
 			// Non existent user
-			case 403: // Suspended:
+			case 403: // Forbidden:
+				return $this->forbidden();
 			case 404: // Removed
 				return $this->request_does_not_exist();
 			// Rate limit
