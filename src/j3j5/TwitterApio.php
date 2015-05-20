@@ -125,7 +125,7 @@ class TwitterApio extends tmhOAuth {
 	 * @param array $headers any custom headers to send with the request. Default empty array
 	 *
 	 * @return int the http response code for the request. 0 is returned if a connection could not be made
-	 *
+	 *tu
 	 * @author Julio Foulquié <jfoulquie@gmail.com>
 	 */
 	public function request($method, $url, $params=array(), $useauth=true, $multipart=false, $headers=array()) {
@@ -223,7 +223,7 @@ class TwitterApio extends tmhOAuth {
 		if ($force_login) {
 			return "https://api.twitter.com/oauth/authenticate?oauth_token={$token}&force_login=true";
 		} else if (empty($sign_in_with_twitter)) {
-			return Config::get('thujohn/twitter::AUTHORIZE_URL') . "?oauth_token={$token}";
+			return "https://api.twitter.com/oauth/authorize?oauth_token={$token}";
 		} else {
 			return "https://api.twitter.com/oauth/authenticate?oauth_token={$token}";
 		}
