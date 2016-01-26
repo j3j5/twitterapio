@@ -325,6 +325,14 @@ class TwitterApio extends tmhOAuth {
 		return new FollowerIterator($this, $slug, $arguments);
 	}
 
+	public function get_user($arguments) {
+		return $this->get('users/show', $arguments);
+	}
+
+	public function get_users($arguments) {
+		return $this->get('users/lookup', $arguments);
+	}
+
 	/**
 	 * Parse the response depending on the provided code
 	 *
