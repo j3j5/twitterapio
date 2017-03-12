@@ -21,10 +21,6 @@ class SearchIterator extends TwitterIterator
     /* Tweet ID from the most recent tweet retrieved */
     public $latest_tweet_id;
 
-    public function __construct($api, $endpoint, $arguments) {
-        parent::__construct($api, $endpoint, $arguments);
-    }
-
     public function rewind() {
         $this->arguments['since_id'] = $this->since_id;
         unset($this->arguments['max_id']);
