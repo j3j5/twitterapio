@@ -28,4 +28,7 @@ foreach($api->get_followers(array('screen_name' => $username, 'count' => 5)) as 
 }
 echo PHP_EOL . PHP_EOL;
 echo count($followers_ids) .  " retrieved in total from the API." . PHP_EOL;
-return;
+foreach ($followers_ids as $id) {
+    echo $id.PHP_EOL;
+}
+
