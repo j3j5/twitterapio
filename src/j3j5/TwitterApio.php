@@ -95,7 +95,6 @@ class TwitterApio extends tmhOAuth {
 	 * @author Julio Foulquié <jfoulquie@gmail.com>
 	 */
 	public function get($slug, $parameters = array()) {
-		$this->log->addInfo("GET to $slug with paramters " . print_r($parameters, TRUE));
 		$code = $this->request('GET', $this->url("{$this->general_config['api_version']}/$slug"), $parameters);
 		return $this->response($code);
 	}
@@ -111,7 +110,6 @@ class TwitterApio extends tmhOAuth {
 	 * @author Julio Foulquié <jfoulquie@gmail.com>
 	 */
 	public function post($slug, $parameters = array()) {
-		$this->log->addInfo("POST to $slug with paramters " . print_r($parameters, TRUE));
 		$code = $this->request('POST', $this->url("{$this->general_config['api_version']}/$slug"), $parameters);
 		return $this->response($code);
 	}
@@ -136,8 +134,7 @@ class TwitterApio extends tmhOAuth {
 			switch($param) {
 				case 'user_id':
 					if(!is_numeric($val)) {
-						$this->log->addWarning("user_id must be numeric $val");
-						return FALSE;
+						throw new \Exception("user_id must be numeric $val");
 					}
 					break;
 				case 'count':
@@ -182,7 +179,7 @@ class TwitterApio extends tmhOAuth {
 		if( isset($token['oauth_token'], $token['oauth_token_secret']) ){
 			return $token;
 		} else {
-			return FALSE;
+			throw new \Exception("No request token found.");
 		}
 	}
 	/**
@@ -208,7 +205,7 @@ class TwitterApio extends tmhOAuth {
 			$this->reconfigure(array('token' => $token['oauth_token'], 'secret' => $token['oauth_token_secret']));
 			return $token;
 		}
-		return FALSE;
+        throw new \Exception("No access token found.");
 	}
 	/**
 	 * Get the authorize URL.
