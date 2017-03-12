@@ -40,6 +40,8 @@ class TwitterApio extends tmhOAuth {
 	 * @param Array $config The application settings to start the OAuth library
 	 *
 	 * @return void
+     *
+	 * @author Julio Foulquié <jfoulquie@gmail.com>
 	 */
 	public function __construct($settings = array(), $config = array()) {
 		include __DIR__ . '/config.php';
@@ -134,7 +136,6 @@ class TwitterApio extends tmhOAuth {
 			switch($param) {
 				case 'user_id':
 					if(!is_numeric($val)) {
-						///TODO: Add logging
 						$this->log->addWarning("user_id must be numeric $val");
 						return FALSE;
 					}
@@ -292,6 +293,21 @@ class TwitterApio extends tmhOAuth {
 	public function get_timeline($slug, $arguments = array()) {
 		return new TimelineIterator($this, $slug, $arguments);
 	}
+
+	/**
+     * Get all results from tweets for the search API returns for the given query.
+     *
+     * @param string $query
+     * @param array $arguments
+     */
+	public function search(string $query, array $arguments = null)
+	{
+        $args = ['q' => $query];
+        if (is_array($arguments)) {
+            $args = array_merge($arguments, $args);
+        }
+        return new SearchIterator($this, 'search/tweets', $args);
+    }
 
 	/**
 	 * Get all possible followers IDs for a given user.
@@ -452,5 +468,10 @@ class TwitterApio extends tmhOAuth {
 			'tts'		=> 0,
 		);
 	}
+
+    public function debug($string)
+    {
+        $this->log->addDebug($string);
+    }
 
 }

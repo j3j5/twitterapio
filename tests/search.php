@@ -10,9 +10,10 @@ $api = new TwitterApio();
 
 $all_tweets = array();
 $i = 1;
-$max_pages = 5;
-$username = '@twitterapi';
-foreach($api->get_timeline('search/tweets', array('q' => $username, 'count' => 20)) as $tweets) {
+$max_pages = 2;
+$username = '#streetart';
+$args = ['count' => 10, 'include_rts' => false];
+foreach($api->search($username, $args) as $tweets) {
 	echo "Retrieving page $i ";
 	if(!empty($tweets) && is_array($tweets)) {
 		echo "with " . count($tweets) . " tweets." . PHP_EOL;
