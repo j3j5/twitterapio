@@ -18,6 +18,7 @@ abstract class TwitterIterator implements \Iterator
 	protected $api;
 	protected $endpoint;
 	protected $arguments;
+	protected $original_arguments;
 
 	protected $sleep_on_rate_limit;
 	protected $response_array;
@@ -28,7 +29,7 @@ abstract class TwitterIterator implements \Iterator
 	public function __construct($api, $endpoint, $arguments) {
 		$this->api = $api;
 		$this->endpoint = $endpoint;
-		$this->arguments = $arguments;
+		$this->original_arguments = $this->arguments = $arguments;
 
 		$general_config = $this->api->get_config();
 		$this->sleep_on_rate_limit = $general_config['sleep_on_rate_limit'];
@@ -90,6 +91,13 @@ abstract class TwitterIterator implements \Iterator
 	public function valid() {
 		return ($this->max_id !== 0);
 	}
+
+	/**
+     * Rewind the Iterator to the first element.
+     */
+	public function rewind() {
+        $this->arguments = $this->original_arguments;
+    }
 
 	/**
      * Return the current element.
