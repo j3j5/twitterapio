@@ -1,7 +1,7 @@
 <?php
 
 /**
-    TwitterApio - A wrapper to make easier to use Twitter's API with tmhOAuth library.
+    TwitterApio - A wrapper to make it easier to use Twitter's API with tmhOAuth library.
     Copyright (C) 2015  Julio Foulquie <jfoulquie@gmail.com>
 
     This program is free software: you can redistribute it and/or modify
@@ -35,9 +35,9 @@ class TwitterApio extends tmhOAuth
      */
     protected $max_counts = [
         'statuses/user_timeline'    => 200,
-        'followers/ids'                => 5000,
-        'search/tweets'                => 100,
-        'users/lookup'                => 100,
+        'followers/ids'             => 5000,
+        'search/tweets'             => 100,
+        'users/lookup'              => 100,
     ];
 
     /**
@@ -89,7 +89,7 @@ class TwitterApio extends tmhOAuth
      *
      * @author Julio Foulquié <jfoulquie@gmail.com>
      */
-    public function get_config()
+    public function getConfig()
     {
         return $this->general_config;
     }
@@ -176,7 +176,7 @@ class TwitterApio extends tmhOAuth
      *
      * @author Julio Foulquié <jfoulquie@gmail.com>
      */
-    public function get_request_token($oauth_callback = null)
+    public function getRequestToken($oauth_callback = null)
     {
         $parameters = [];
         if (!empty($oauth_callback)) {
@@ -204,7 +204,7 @@ class TwitterApio extends tmhOAuth
      *
      * @author Julio Foulquié <jfoulquie@gmail.com>
      */
-    public function get_access_token($oauth_verifier = false)
+    public function getAccessToken($oauth_verifier = false)
     {
         $parameters = [];
         if (!empty($oauth_verifier)) {
@@ -228,7 +228,7 @@ class TwitterApio extends tmhOAuth
      *
      * @author Julio Foulquié <jfoulquie@gmail.com>
      */
-    public function get_authorize_url($token, $sign_in_with_twitter = true, $force_login = false)
+    public function getAuthorizeUrl($token, $sign_in_with_twitter = true, $force_login = false)
     {
         if (is_array($token)) {
             $token = $token['oauth_token'];
@@ -304,7 +304,7 @@ class TwitterApio extends tmhOAuth
      *
      * @author Julio Foulquié <jfoulquie@gmail.com>
      */
-    public function get_timeline($slug, $arguments = [])
+    public function getTimeline($slug, $arguments = [])
     {
         return new TimelineIterator($this, $slug, $arguments);
     }
@@ -335,7 +335,7 @@ class TwitterApio extends tmhOAuth
      *
      * @author Julio Foulquié <jfoulquie@gmail.com>
      */
-    public function get_followers($arguments)
+    public function getFollowers($arguments)
     {
         $slug = 'followers/ids';
         return new FollowerIterator($this, $slug, $arguments);
@@ -352,18 +352,33 @@ class TwitterApio extends tmhOAuth
      *
      * @author Julio Foulquié <jfoulquie@gmail.com>
      */
-    public function get_friends($arguments)
+    public function getFriends($arguments)
     {
         $slug = 'friends/ids';
         return new FollowerIterator($this, $slug, $arguments);
     }
 
-    public function get_user($arguments)
+    /**
+     * Get info about a given user.
+     * Search can be performed based on ID, screen name...
+     *
+     * @param array $arguments
+     *
+     * @return array
+     */
+    public function getUser($arguments)
     {
         return $this->get('users/show', $arguments);
     }
 
-    public function get_users($arguments)
+    /**
+     * Get info about different users.
+     *
+     * @param array $arguments
+     *
+     * @return array
+     */
+    public function getUsers($arguments)
     {
         return $this->get('users/lookup', $arguments);
     }
@@ -393,14 +408,14 @@ class TwitterApio extends tmhOAuth
             case 403: // Forbidden:
                 return $this->forbidden();
             case 404: // Removed
-                return $this->request_does_not_exist();
+                return $this->requestDoesNotExist();
             // Rate limit
             case 429:
-                return $this->rate_limit();
+                return $this->rateLimit();
             // OAuth Credentials are NOT VALID or others
             case 400:
             default:
-                return $this->general_error();
+                return $this->generalError();
         }
     }
 
@@ -408,7 +423,7 @@ class TwitterApio extends tmhOAuth
      * Process a successful response and return the parsed output
      *
      * @return Object|Array|Bool Return the decoded output depending on the values of the config object,
-     * 							FALSE on error.
+     *                           FALSE on error.
      *
      * @author Julio Foulquié <jfoulquie@gmail.com>
      */
@@ -436,9 +451,9 @@ class TwitterApio extends tmhOAuth
     {
         $this->log->addError("Error {$this->response['code']}: {$this->response['response']}");
         return [
-            'code'        => $this->response['code'],
+            'code'      => $this->response['code'],
             'errors'    => $this->response['response'],
-            'tts'        => 0,
+            'tts'       => 0,
         ];
     }
 
@@ -450,13 +465,13 @@ class TwitterApio extends tmhOAuth
      *
      * @author Julio Foulquié <jfoulquie@gmail.com>
      */
-    private function request_does_not_exist()
+    private function requestDoesNotExist()
     {
         $this->log->addError("Error {$this->response['code']}: {$this->response['response']}");
         return [
-            'code'        => $this->response['code'],
+            'code'      => $this->response['code'],
             'errors'    => $this->response['response'],
-            'tts'        => 0,
+            'tts'       => 0,
         ];
     }
 
@@ -464,18 +479,18 @@ class TwitterApio extends tmhOAuth
      * Return the error response when a rate limit has been reached on a given endpoint.
      *
      * @return Array Includes the 'tts' in case this is run from a CLI and you want to
-     * 				sleep the process till the rate limit is gone.
+     *               sleep the process till the rate limit is gone.
      *
      * @author Julio Foulquié <jfoulquie@gmail.com>
      */
-    private function rate_limit()
+    private function rateLimit()
     {
         $this->log->addError('RATE LIMIT!');
         $this->log->addError("Error {$this->response['code']}: {$this->response['response']}");
         return [
-            'code'        => $this->response['code'],
+            'code'      => $this->response['code'],
             'errors'    => $this->response['response'],
-            'tts'        => isset($this->response['headers']['x-rate-limit-reset']) ? // Time To Sleep
+            'tts'       => isset($this->response['headers']['x-rate-limit-reset']) ? // Time To Sleep
                             ($this->response['headers']['x-rate-limit-reset'] - time()) :
                             false,
         ];
@@ -488,14 +503,14 @@ class TwitterApio extends tmhOAuth
      *
      * @author Julio Foulquié <jfoulquie@gmail.com>
      */
-    private function general_error()
+    private function generalError()
     {
         $this->log->addError('API ERROR!');
         $this->log->addError(print_r($this->response, true));
         return [
-            'code'        => $this->response['code'],
+            'code'      => $this->response['code'],
             'errors'    => $this->response['response'],
-            'tts'        => 0,
+            'tts'       => 0,
         ];
     }
 
