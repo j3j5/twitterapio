@@ -368,6 +368,11 @@ class TwitterApio extends tmhOAuth
         return $this->get('users/lookup', $arguments);
     }
 
+    public function geoSearch(array $arguments)
+    {
+        return $this->get('geo/search', $arguments);
+    }
+
     /**
      * Parse the response depending on the provided code
      *
