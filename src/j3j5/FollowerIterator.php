@@ -19,83 +19,88 @@
 
 namespace j3j5;
 
-class FollowerIterator extends TwitterIterator {
+class FollowerIterator extends TwitterIterator
+{
+    private $cursor = '-1';
+    private $prev_cursor = -1;
+    private $next_cursor = 0;
 
-	private $cursor = "-1";
-	private $prev_cursor = -1;
-	private $next_cursor = 0;
+    public function __construct($api, $endpoint, $arguments)
+    {
+        parent::__construct($api, $endpoint, $arguments);
+    }
 
-	public function __construct($api, $endpoint, $arguments) {
-		parent::__construct($api, $endpoint, $arguments);
-	}
+    public function rewind()
+    {
+        $this->cursor = $this->prev_cursor;
+        $this->arguments['cursor'] = $this->cursor;
+    }
 
-	public function rewind() {
-		$this->cursor = $this->prev_cursor;
-		$this->arguments['cursor'] = $this->cursor;
-	}
+    public function current()
+    {
+        $arguments = $this->arguments;
 
-	public function current() {
-		$arguments = $this->arguments;
-
-		$response = $this->api->get($this->endpoint, $arguments);
+        $response = $this->api->get($this->endpoint, $arguments);
         // Check rate limits.
         $response = $this->checkRateLimits($response, $arguments);
 
-		if($this->response_array) {
-			// Set previous cursor
-			if (isset($response['previous_cursor'])) {
-				$this->prev_cursor = $response['previous_cursor'];
-			} else {
-				$this->prev_cursor = 0;
-			}
+        if ($this->response_array) {
+            // Set previous cursor
+            if (isset($response['previous_cursor'])) {
+                $this->prev_cursor = $response['previous_cursor'];
+            } else {
+                $this->prev_cursor = 0;
+            }
 
-			// Set next cursor
-			if (isset($response['next_cursor'])) {
-				$this->next_cursor = $response['next_cursor'];
-			} else {
-				$this->next_cursor = 0;
-			}
+            // Set next cursor
+            if (isset($response['next_cursor'])) {
+                $this->next_cursor = $response['next_cursor'];
+            } else {
+                $this->next_cursor = 0;
+            }
 
-			if(isset($response['ids'])) {
-				return $response['ids'];
-			} else {
-				return array();
-			}
-		} else {
-			// Set previous cursor
-			if (isset($response->previous_cursor)) {
-				$this->prev_cursor = $response->previous_cursor;
-			} else {
-				$this->prev_cursor = 0;
-			}
+            if (isset($response['ids'])) {
+                return $response['ids'];
+            } else {
+                return [];
+            }
+        } else {
+            // Set previous cursor
+            if (isset($response->previous_cursor)) {
+                $this->prev_cursor = $response->previous_cursor;
+            } else {
+                $this->prev_cursor = 0;
+            }
 
-			// Set next cursor
-			if (isset($response->next_cursor)) {
-				$this->next_cursor = $response->next_cursor;
-			} else {
-				$this->next_cursor = 0;
-			}
+            // Set next cursor
+            if (isset($response->next_cursor)) {
+                $this->next_cursor = $response->next_cursor;
+            } else {
+                $this->next_cursor = 0;
+            }
 
-			// Return the result
-			if(isset($response->ids)) {
-				return $response->ids;
-			} else {
-				return array();
-			}
-		}
-	}
+            // Return the result
+            if (isset($response->ids)) {
+                return $response->ids;
+            } else {
+                return [];
+            }
+        }
+    }
 
-	public function key() {
-		return $this->cursor;
-	}
+    public function key()
+    {
+        return $this->cursor;
+    }
 
-	public function next() {
-		$this->cursor = $this->next_cursor;
-		$this->arguments['cursor'] = $this->cursor;
-	}
+    public function next()
+    {
+        $this->cursor = $this->next_cursor;
+        $this->arguments['cursor'] = $this->cursor;
+    }
 
-	public function valid() {
-		return ($this->cursor != 0);
-	}
-
+    public function valid()
+    {
+        return ($this->cursor != 0);
+    }
 }

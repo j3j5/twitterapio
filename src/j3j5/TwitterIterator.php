@@ -15,47 +15,48 @@ namespace j3j5;
  */
 abstract class TwitterIterator implements \Iterator
 {
-	protected $api;
-	protected $endpoint;
-	protected $arguments;
-	protected $original_arguments;
+    protected $api;
+    protected $endpoint;
+    protected $arguments;
+    protected $original_arguments;
 
-	protected $sleep_on_rate_limit;
-	protected $response_array;
+    protected $sleep_on_rate_limit;
+    protected $response_array;
 
     protected $since_id = -1;
     protected $max_id = -1;
 
-	public function __construct($api, $endpoint, $arguments) {
-		$this->api = $api;
-		$this->endpoint = $endpoint;
-		$this->original_arguments = $this->arguments = $arguments;
+    public function __construct($api, $endpoint, $arguments)
+    {
+        $this->api = $api;
+        $this->endpoint = $endpoint;
+        $this->original_arguments = $this->arguments = $arguments;
 
-		$general_config = $this->api->get_config();
-		$this->sleep_on_rate_limit = $general_config['sleep_on_rate_limit'];
-		// Overwrite the setting if running on webserver
-		if(PHP_SAPI != 'cli') {
-			$this->sleep_on_rate_limit = FALSE;
-		}
-		$this->response_array = isset($general_config['json_decode']) && $general_config['json_decode'] == 'array' ? TRUE : FALSE ;
-	}
+        $general_config = $this->api->get_config();
+        $this->sleep_on_rate_limit = $general_config['sleep_on_rate_limit'];
+        // Overwrite the setting if running on webserver
+        if (PHP_SAPI != 'cli') {
+            $this->sleep_on_rate_limit = false;
+        }
+        $this->response_array = isset($general_config['json_decode']) && $general_config['json_decode'] == 'array' ? true : false;
+    }
 
-	/**
+    /**
      * Check whether the response from Twitter's API is rate limiting the calls or not.
      *
      * @param array $response Twitter's respose
      *
      * @
      */
-	public function checkRateLimits(array $response, array $original_arguments)
-	{
+    public function checkRateLimits(array $response, array $original_arguments)
+    {
         // Check for rate limits
-        if(is_array($response) && isset($response['errors'], $response['tts']) ) {
-            if($this->sleep_on_rate_limit) {
-                if($response['tts'] == 0) {
-                    $this->api->debug("An error occured: " . print_r($response['errors'], TRUE));
+        if (is_array($response) && isset($response['errors'], $response['tts'])) {
+            if ($this->sleep_on_rate_limit) {
+                if ($response['tts'] == 0) {
+                    $this->api->debug('An error occured: ' . print_r($response['errors'], true));
                     $this->max_id = $this->since_id = 0;
-                    return array();
+                    return [];
                 } else {
                     $this->api->debug("Sleeping for {$response['tts']}s. ...");
                     sleep($response['tts'] + 1);
@@ -64,7 +65,7 @@ abstract class TwitterIterator implements \Iterator
                 }
             } else {
                 $this->max_id = $this->since_id = 0;
-                return array();
+                return [];
             }
         }
         return $response;
@@ -73,35 +74,38 @@ abstract class TwitterIterator implements \Iterator
     /**
      * Return the key of the current element.
      */
-	public function key() {
-		return $this->max_id;
-	}
+    public function key()
+    {
+        return $this->max_id;
+    }
 
-	/**
+    /**
      * Move forward to next element.
      */
-	public function next() {
-		unset($this->arguments['since_id']);
-		$this->arguments['max_id'] = $this->max_id;
-	}
+    public function next()
+    {
+        unset($this->arguments['since_id']);
+        $this->arguments['max_id'] = $this->max_id;
+    }
 
-	/**
+    /**
      * Checks if current position is valid.
      */
-	public function valid() {
-		return ($this->max_id !== 0);
-	}
+    public function valid()
+    {
+        return ($this->max_id !== 0);
+    }
 
-	/**
+    /**
      * Rewind the Iterator to the first element.
      */
-	public function rewind() {
+    public function rewind()
+    {
         $this->arguments = $this->original_arguments;
     }
 
-	/**
+    /**
      * Return the current element.
      */
-	abstract public function current();
-
+    abstract public function current();
 }
