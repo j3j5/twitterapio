@@ -4,3 +4,4 @@ composer.phar
 *.diff
 *kdev4
 *-swp
+/src/data/logs/*
