@@ -21,14 +21,11 @@
 namespace j3j5;
 
 use tmhOAuth;
-use Monolog\Logger;
-use Monolog\Handler\StreamHandler;
 
 class TwitterApio extends tmhOAuth
 {
     protected $api_settings;
     protected $general_config;
-    private $log;
 
     /**
      * Max value for count parameters on different endpoints.
@@ -55,13 +52,6 @@ class TwitterApio extends tmhOAuth
         include __DIR__ . '/config.php';
         $this->general_config = array_merge($general_config, $twitter_settings);
         $this->general_config = array_merge($this->general_config, $config);
-
-        $this->log = new Logger('twitter-apio');
-        if (PHP_SAPI == 'cli') {
-            $this->log->pushHandler(new StreamHandler('php://stdout', Logger::DEBUG));
-        } else {
-            $this->log->pushHandler(new StreamHandler(dirname(__DIR__) . '/data/logs/twitterapio.log', Logger::DEBUG));
-        }
 
         parent::__construct(array_merge($twitter_settings, $settings));
     }
@@ -161,7 +151,6 @@ class TwitterApio extends tmhOAuth
             }
         }
 
-        $this->log->addInfo("$method request to $url with params " . print_r($params, true));
         return parent::request($method, $url, $params, $useauth, $multipart, $headers);
     }
 
@@ -366,8 +355,32 @@ class TwitterApio extends tmhOAuth
      *
      * @return array
      */
-    public function getUser($arguments)
+    public function getUser(string $query, array $extra_args = null)
     {
+        if (is_numeric($query)) {
+            $response = $this->getUserByID($query, $extra_args);
+            if (!isset($response['errors'])) {
+                return $response;
+            }
+        }
+        return $this->getUserByUsername($query, $extra_args);
+    }
+
+    protected function getUserByID($twitter_id, array $extra_args = null)
+    {
+        $arguments = ['user_id' => $twitter_id];
+        if (!is_null($extra_args)) {
+            $arguments = array_merge($extra_args, $arguments);
+        }
+        return $this->get('users/show', $arguments);
+    }
+
+    protected function getUserByUsername($username, array $extra_args = null)
+    {
+        $arguments = ['screen_name' => $username];
+        if (!is_null($extra_args)) {
+            $arguments = array_merge($extra_args, $arguments);
+        }
         return $this->get('users/show', $arguments);
     }
 
@@ -429,10 +442,8 @@ class TwitterApio extends tmhOAuth
      */
     private function success()
     {
-        $this->log->addDebug('Request succeeded!!');
         if (!isset($this->response['response']) or !is_string($this->response['response'])) {
-            $this->log->addError('There is no response! PANIC!!');
-            return false;
+            throw new \Exception('There is no response! PANIC!!');
         }
         $json_output = $this->general_config['json_decode'] == 'array' ? true : false;
 
@@ -449,7 +460,6 @@ class TwitterApio extends tmhOAuth
      */
     private function forbidden()
     {
-        $this->log->addError("Error {$this->response['code']}: {$this->response['response']}");
         return [
             'code'      => $this->response['code'],
             'errors'    => $this->response['response'],
@@ -467,7 +477,6 @@ class TwitterApio extends tmhOAuth
      */
     private function requestDoesNotExist()
     {
-        $this->log->addError("Error {$this->response['code']}: {$this->response['response']}");
         return [
             'code'      => $this->response['code'],
             'errors'    => $this->response['response'],
@@ -485,8 +494,6 @@ class TwitterApio extends tmhOAuth
      */
     private function rateLimit()
     {
-        $this->log->addError('RATE LIMIT!');
-        $this->log->addError("Error {$this->response['code']}: {$this->response['response']}");
         return [
             'code'      => $this->response['code'],
             'errors'    => $this->response['response'],
@@ -505,17 +512,10 @@ class TwitterApio extends tmhOAuth
      */
     private function generalError()
     {
-        $this->log->addError('API ERROR!');
-        $this->log->addError(print_r($this->response, true));
         return [
             'code'      => $this->response['code'],
             'errors'    => $this->response['response'],
             'tts'       => 0,
         ];
-    }
-
-    public function debug($string)
-    {
-        $this->log->addDebug($string);
     }
 }
