@@ -11,7 +11,7 @@ $followers_ids = [];
 $i = 1;
 $max_pages = 5;
 $username = 'twitterapi';
-foreach ($api->get_followers(['screen_name' => $username, 'count' => 5]) as $followers) {
+foreach ($api->getFollowers(['screen_name' => $username, 'count' => 5]) as $followers) {
     echo "Retrieving page $i ";
     if (!empty($followers) && is_array($followers)) {
         echo 'with ' . count($followers) . ' followers.' . PHP_EOL;

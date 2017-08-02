@@ -17,9 +17,9 @@ if (isset($_REQUEST['function'])) {
         $callback_url = $current_url . '?function=callback';
         // Make sure we make this request w/o tokens, overwrite the default values in case of login.
         $api->reconfigure(['token' => '', 'secret' => '']);
-        $token = $api->get_request_token($callback_url);
+        $token = $api->getRequestToken($callback_url);
         if (isset($token['oauth_token_secret'])) {
-            $url = $api->get_authorize_url($token, $sign_in_twitter, $force_login);
+            $url = $api->getAuthorizeUrl($token, $sign_in_twitter, $force_login);
 
             $_SESSION['oauth_state'] =  'start';
             $_SESSION['oauth_request_token'] = $token['oauth_token'];
@@ -47,7 +47,7 @@ if (isset($_REQUEST['function'])) {
             }
 
             // get_access_token() will reset the token for you
-            $token = $api->get_access_token($oauth_verifier);
+            $token = $api->getAccessToken($oauth_verifier);
             if (!isset($token['oauth_token_secret'])) {
                 header("Location: $current_url?function=error&error=" . urlencode(print_r($token, true)));
                 exit;

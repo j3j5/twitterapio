@@ -11,7 +11,7 @@ $all_tweets = [];
 $i = 1;
 $max_pages = 5;
 $username = 'twitterapi';
-foreach ($api->get_timeline('statuses/user_timeline', ['screen_name' => $username, 'count' => 20]) as $tweets) {
+foreach ($api->getTimeline('statuses/user_timeline', ['screen_name' => $username, 'count' => 20]) as $tweets) {
     echo "Retrieving page $i ";
     if (!empty($tweets) && is_array($tweets)) {
         echo 'with ' . count($tweets) . ' tweets.' . PHP_EOL;
