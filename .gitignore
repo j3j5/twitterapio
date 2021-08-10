@@ -5,3 +5,5 @@ composer.phar
 *kdev4
 *-swp
 /src/data/logs/*
+composer.lock
+.php_cs.cache
