@@ -405,13 +405,14 @@ class TwitterApio extends tmhOAuth
     }
 
     public function uploadMedia(array $params) {
-        $oldHost = $this->general_config['host'];
-        parent::reconfigure(['host' => 'upload.twitter.com']);
+        $oldHost = $this->config['host'];
+        parent::reconfigure(array_merge($this->config, ['host' => 'upload.twitter.com']));
 
-        $response = $this->post('media/upload', $params);
+        $code = $this->request('POST', $this->url("{$this->general_config['api_version']}/media/upload"), $params, true, true, ['content-type' => 'multipart/form-data']);
+        $response = $this->response($code);
 
         // Go back to normal
-        parent::reconfigure(['host' => $oldHost]);
+        parent::reconfigure(array_merge($this->config, ['host' => $oldHost]));
 
         return $response;
     }
@@ -419,12 +420,25 @@ class TwitterApio extends tmhOAuth
     public function addMetadata(array $params)
     {
         $oldHost = $this->config['host'];
-        parent::reconfigure(['host' => 'upload.twitter.com']);
+        parent::reconfigure(array_merge($this->config, ['host' => 'upload.twitter.com']));
 
-        $response = $this->post('/media/metadata/create', $params);
+        // $response = $this->post('/media/metadata/create', $params);
+        $options = [
+            'method'    => 'POST',
+            'url'       => $this->url("{$this->general_config['api_version']}/media/metadata/create"),
+            'params'    => [],
+            'with_user' => true,
+            'multipart' => false,
+            'headers'   => ['content-type' => 'application/json; charset=UTF-8'],
+            'without_bearer' => false,
+            'postfields' => json_encode($params),
+        ];
+
+        $code = $this->user_request($options);
+        $response = $this->response($code);
 
         // Go back to normal
-        parent::reconfigure(['host' => $oldHost]);
+        parent::reconfigure(array_merge($this->config, ['host' => $oldHost]));
 
         return $response;
     }
