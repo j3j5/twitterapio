@@ -40,14 +40,14 @@ class TwitterApio extends tmhOAuth
     /**
      * Create an instance of the TwitterApio class.
      *
-     * @param Array $settings The settings to start the OAuth library (consumers and tokens)
-     * @param Array $config The application settings to start the OAuth library
+     * @param array $settings The settings to start the OAuth library (consumers and tokens)
+     * @param array $config The application settings to start the OAuth library
      *
      * @return void
      *
      * @author Julio Foulquié <jfoulquie@gmail.com>
      */
-    public function __construct($settings = [], $config = [])
+    public function __construct(array $settings = [], array $config = [])
     {
         include dirname(__DIR__) . '/config/config.php';
         $this->general_config = array_merge($general_config, $twitter_settings);    // Original twitter settings from config file
@@ -59,7 +59,7 @@ class TwitterApio extends tmhOAuth
     /**
      * Set new config values for the OAuth class like different tokens.
      *
-     * @param Array $config An array containing the values that should be overwritten.
+     * @param array $config An array containing the values that should be overwritten.
      *
      * @return void
      *
@@ -75,11 +75,11 @@ class TwitterApio extends tmhOAuth
     /**
      * Get the current config array from the class.
      *
-     * @return Array
+     * @return array
      *
      * @author Julio Foulquié <jfoulquie@gmail.com>
      */
-    public function getConfig()
+    public function getConfig() : array
     {
         return $this->general_config;
     }
@@ -88,13 +88,13 @@ class TwitterApio extends tmhOAuth
      * Do a GET request to the Twitter API.
      *
      * @param string $slug The slug to retrieve from Twitter's API
-     * @param string $parameters Optional parameters to set for the request
+     * @param array $parameters Optional parameters to set for the request
      *
-     * @return Bool|Array A response array, or FALSE
+     * @return bool|array A response array, or false
      *
      * @author Julio Foulquié <jfoulquie@gmail.com>
      */
-    public function get($slug, $parameters = [])
+    public function get(string $slug, array $parameters = [])
     {
         $code = $this->request('GET', $this->url("{$this->general_config['api_version']}/$slug"), $parameters);
         return $this->response($code);
@@ -104,13 +104,13 @@ class TwitterApio extends tmhOAuth
      * Do a POST request to the Twitter API.
      *
      * @param string $slug The slug to retrieve from Twitter's API
-     * @param string $parameters Optional parameters to set for the request
+     * @param array $parameters Optional parameters to set for the request
      *
-     * @return Bool|Array A response array, or FALSE
+     * @return bool|array A response array, or false
      *
      * @author Julio Foulquié <jfoulquie@gmail.com>
      */
-    public function post($slug, $parameters = [])
+    public function post(string $slug, array $parameters = [])
     {
         $code = $this->request('POST', $this->url("{$this->general_config['api_version']}/$slug"), $parameters);
         return $this->response($code);
@@ -157,15 +157,15 @@ class TwitterApio extends tmhOAuth
     /**
      * Get a request_token from Twitter.
      *
-     * @param String $oauth_callback [Optional] The callback provided for Twitter's API.
-     * The user will be redirected there after authorizing your app oAn Twitter.
+     * @param string $oauth_callback [Optional] The callback provided for Twitter's API.
+     * The user will be redirected there after authorizing your app on Twitter.
      *
-     * @return Array|Bool a key/value array containing oauth_token and oauth_token_secret
+     * @return array|bool a key/value array containing oauth_token and oauth_token_secret
      * 						in case of success
      *
      * @author Julio Foulquié <jfoulquie@gmail.com>
      */
-    public function getRequestToken($oauth_callback = null)
+    public function getRequestToken(string $oauth_callback = null)
     {
         $parameters = [];
         if (!empty($oauth_callback)) {
@@ -187,13 +187,13 @@ class TwitterApio extends tmhOAuth
     /**
      * Get an access token for a logged in user.
      *
-     * @param String|Bool $oauth_verifier
+     * @param string $oauth_verifier
      *
-     * @return Array|Bool key/value array containing the token in case of success
+     * @return array|bool key/value array containing the token in case of success
      *
      * @author Julio Foulquié <jfoulquie@gmail.com>
      */
-    public function getAccessToken($oauth_verifier = false)
+    public function getAccessToken(string $oauth_verifier = null)
     {
         $parameters = [];
         if (!empty($oauth_verifier)) {
@@ -205,7 +205,10 @@ class TwitterApio extends tmhOAuth
             $token = [];
             parse_str($get_parameters, $token);
             // Reconfigure the tmhOAuth class with the new tokens
-            $this->reconfigure(['token' => $token['oauth_token'], 'secret' => $token['oauth_token_secret']]);
+            $this->reconfigure([
+                'token' => $token['oauth_token'],
+                'secret' => $token['oauth_token_secret']]
+            );
             return $token;
         }
         throw new \Exception('No access token found.');
@@ -213,11 +216,11 @@ class TwitterApio extends tmhOAuth
     /**
      * Get the authorize URL.
      *
-     * @returns string
+     * @return string
      *
      * @author Julio Foulquié <jfoulquie@gmail.com>
      */
-    public function getAuthorizeUrl($token, $sign_in_with_twitter = true, $force_login = false)
+    public function getAuthorizeUrl($token, bool $sign_in_with_twitter = true, bool $force_login = false)
     {
         if (is_array($token)) {
             $token = $token['oauth_token'];
@@ -234,14 +237,14 @@ class TwitterApio extends tmhOAuth
     /**
      * Block a given user.
      *
-     * @param Int $twitter_id
-     * @param Array $parameters [optional] Any extra parameters
+     * @param int|string $twitter_id
+     * @param array $parameters [optional] Any extra parameters
      *
-     * @return return
+     * @return array|bool
      *
      * @author Julio Foulquié <jfoulquie@gmail.com>
      */
-    public function block($twitter_id, $parameters = [])
+    public function block($twitter_id, array $parameters = [])
     {
         if (!is_numeric($twitter_id)) {
             return false;
@@ -259,14 +262,14 @@ class TwitterApio extends tmhOAuth
     /**
      * Unblock a given user.
      *
-     * @param Int $twitter_id
-     * @param Array $parameters [optional] Any extra parameters
+     * @param int|string $twitter_id
+     * @param array $parameters [optional] Any extra parameters
      *
-     * @return return
+     * @return array|bool
      *
      * @author Julio Foulquié <jfoulquie@gmail.com>
      */
-    public function unblock($twitter_id, $parameters = [])
+    public function unblock($twitter_id, array $parameters = [])
     {
         if (!is_numeric($twitter_id)) {
             return false;
@@ -286,14 +289,14 @@ class TwitterApio extends tmhOAuth
      * This function returns an iterator so must be used with a function that implements the Iterator
      * interface
      *
-     * @param String $slug The timeline endpoint to be used on the iterator
-     * @param Array $arguments [Optional] Extra argument for the request
+     * @param string $slug The timeline endpoint to be used on the iterator
+     * @param array $arguments [Optional] Extra argument for the request
      *
      * @return TimelineIterator
      *
      * @author Julio Foulquié <jfoulquie@gmail.com>
      */
-    public function getTimeline($slug, $arguments = [])
+    public function getTimeline(string $slug, array $arguments = [])
     {
         return new TimelineIterator($this, $slug, $arguments);
     }
@@ -318,13 +321,13 @@ class TwitterApio extends tmhOAuth
      * This function returns an iterator so must be used with a function that implements the Iterator
      * interface
      *
-     * @param Array $arguments Arguments for the request ('user_id' or 'screen_name' at least, but also 'count' or others are possible)
+     * @param array $arguments Arguments for the request ('user_id' or 'screen_name' at least, but also 'count' or others are possible)
      *
      * @return FollowerIterator
      *
      * @author Julio Foulquié <jfoulquie@gmail.com>
      */
-    public function getFollowers($arguments)
+    public function getFollowers(array $arguments)
     {
         $slug = 'followers/ids';
         return new FollowerIterator($this, $slug, $arguments);
@@ -335,13 +338,13 @@ class TwitterApio extends tmhOAuth
      * This function returns an iterator so must be used with a function that implements the Iterator
      * interface
      *
-     * @param Array $arguments Arguments for the request ('user_id' or 'screen_name' at least, but also 'count' or others are possible)
+     * @param array $arguments Arguments for the request ('user_id' or 'screen_name' at least, but also 'count' or others are possible)
      *
      * @return FollowerIterator
      *
      * @author Julio Foulquié <jfoulquie@gmail.com>
      */
-    public function getFriends($arguments)
+    public function getFriends(array $arguments)
     {
         $slug = 'friends/ids';
         return new FollowerIterator($this, $slug, $arguments);
@@ -366,7 +369,7 @@ class TwitterApio extends tmhOAuth
         return $this->getUserByUsername($query, $extra_args);
     }
 
-    protected function getUserByID($twitter_id, array $extra_args = null)
+    protected function getUserByID(string $twitter_id, array $extra_args = null)
     {
         $arguments = ['user_id' => $twitter_id];
         if (!is_null($extra_args)) {
@@ -375,7 +378,7 @@ class TwitterApio extends tmhOAuth
         return $this->get('users/show', $arguments);
     }
 
-    protected function getUserByUsername($username, array $extra_args = null)
+    protected function getUserByUsername(string $username, array $extra_args = null)
     {
         $arguments = ['screen_name' => $username];
         if (!is_null($extra_args)) {
@@ -391,7 +394,7 @@ class TwitterApio extends tmhOAuth
      *
      * @return array
      */
-    public function getUsers($arguments)
+    public function getUsers(array $arguments)
     {
         return $this->get('users/lookup', $arguments);
     }
@@ -404,13 +407,13 @@ class TwitterApio extends tmhOAuth
     /**
      * Parse the response depending on the provided code
      *
-     * @param Int $code Response code.
+     * @param int $code Response code.
      *
-     * @return Mixed
+     * @return mixed
      *
      * @author Julio Foulquié <jfoulquie@gmail.com>
      */
-    private function response($code)
+    private function response(int $code)
     {
         switch ($code) {
             // Successful
@@ -435,8 +438,8 @@ class TwitterApio extends tmhOAuth
     /**
      * Process a successful response and return the parsed output
      *
-     * @return Object|Array|Bool Return the decoded output depending on the values of the config object,
-     *                           FALSE on error.
+     * @return object|array|bool Return the decoded output depending on the values of the config object,
+     *                           false on error.
      *
      * @author Julio Foulquié <jfoulquie@gmail.com>
      */
@@ -458,7 +461,7 @@ class TwitterApio extends tmhOAuth
      *
      * @author Julio Foulquié <jfoulquie@gmail.com>
      */
-    private function forbidden()
+    private function forbidden() : array
     {
         return [
             'code'      => $this->response['code'],
@@ -475,7 +478,7 @@ class TwitterApio extends tmhOAuth
      *
      * @author Julio Foulquié <jfoulquie@gmail.com>
      */
-    private function requestDoesNotExist()
+    private function requestDoesNotExist() : array
     {
         return [
             'code'      => $this->response['code'],
@@ -487,12 +490,12 @@ class TwitterApio extends tmhOAuth
     /**
      * Return the error response when a rate limit has been reached on a given endpoint.
      *
-     * @return Array Includes the 'tts' in case this is run from a CLI and you want to
+     * @return array Includes the 'tts' in case this is run from a CLI and you want to
      *               sleep the process till the rate limit is gone.
      *
      * @author Julio Foulquié <jfoulquie@gmail.com>
      */
-    private function rateLimit()
+    private function rateLimit() : array
     {
         return [
             'code'      => $this->response['code'],
@@ -506,11 +509,11 @@ class TwitterApio extends tmhOAuth
     /**
      * Return the error response for general errors from the API.
      *
-     * @return String|Bool The response string or FALSE
+     * @return array
      *
      * @author Julio Foulquié <jfoulquie@gmail.com>
      */
-    private function generalError()
+    private function generalError() : array
     {
         return [
             'code'      => $this->response['code'],
