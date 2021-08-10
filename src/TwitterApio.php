@@ -404,6 +404,31 @@ class TwitterApio extends tmhOAuth
         return $this->get('geo/search', $arguments);
     }
 
+    public function uploadMedia(array $params) {
+        $oldHost = $this->general_config['host'];
+        parent::reconfigure(['host' => 'upload.twitter.com']);
+
+        $response = $this->post('media/upload', $params);
+
+        // Go back to normal
+        parent::reconfigure(['host' => $oldHost]);
+
+        return $response;
+    }
+
+    public function addMetadata(array $params)
+    {
+        $oldHost = $this->general_config['host'];
+        parent::reconfigure(['host' => 'upload.twitter.com']);
+
+        $response = $this->post('/media/metadata/create', $params);
+
+        // Go back to normal
+        parent::reconfigure(['host' => $oldHost]);
+
+        return $response;
+    }
+
     /**
      * Parse the response depending on the provided code
      *
