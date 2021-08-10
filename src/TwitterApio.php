@@ -418,7 +418,7 @@ class TwitterApio extends tmhOAuth
 
     public function addMetadata(array $params)
     {
-        $oldHost = $this->general_config['host'];
+        $oldHost = $this->config['host'];
         parent::reconfigure(['host' => 'upload.twitter.com']);
 
         $response = $this->post('/media/metadata/create', $params);
